@@ -8,6 +8,9 @@ fisica.start()
 fisica.setGravity(0, 8.0)
 --fisica.setDrawMode("hybrid")
 
+-- plano de fundo do jogo
+local fundo = display.newImage("imagens/fundo.png")
+  fundo.y = display.contentHeight/2
 -- variaveis para o uso no código
 local motionx = 0
 local speed = 2
@@ -18,35 +21,6 @@ local w = 0 -- guarda a posição x
 local tempo = 7000 -- guarda o tempo utilizado no transation
 local score = 0 -- pontuação
 
--- plano de fundo do jogo
-local fundo = display.newImage("fundo.png")
-fundo.y = display.contentHeight/2
-
---linha de topo
-local topo = display.newRect(0,-20,display.contentWidth,1)
-fisica.addBody(topo,"static")
-topo.myName="topo"
-
--- carregar personagem
-local bola = display.newImage("bola.png")
-bola.x = display.contentWidth/2
-bola.y = 0
-fisica.addBody(bola, {bounce=0.3, friction=0.5}) --radius=13
-bola.myName="bola"
-
--- função utilizada no transation.to para retirar os obstaculos
-local function some (self)
-   self:removeSelf()
-end
-
--- primeiro obstaculo para impedir que a bola caia no inicio do jogo
-local obstaculo = display.newImage("obs.png")
-obstaculo.x = 157
-obstaculo.y = 480
-transition.to(obstaculo,{x= 157,y=0, time = 7000,onComplete = some})
-fisica.addBody (obstaculo, "static",{bounce = 0.3,friction=0.5})
-obstaculo.myName="obstaculos"
-
 -- Exibe pontuação
 local function novoTexto()
   textScore = display.newText("Score: "..score, 240,-40, nil, 12)
@@ -56,10 +30,49 @@ local function updateTexto()
   textScore.text = "Score: "..score
 end
 
+-- carregar personagem
+
+local  bola = display.newImage("imagens/bola.png")
+  bola.x = display.contentWidth/2
+  bola.y = 0
+  fisica.addBody(bola, {bounce=0.3, friction=0.5}) --radius=13
+  bola.myName="bola"
+
+-- função utilizada no transation.to para retirar os obstaculos
+local function some (self)
+   self:removeSelf()
+end
+
+-- primeiro obstaculo para impedir que a bola caia no inicio do jogo
+local obstaculo = display.newImage("imagens/obs.png")
+  obstaculo.x = 157
+  obstaculo.y = 480
+  transition.to(obstaculo,{x= 157,y=0, time = 7000,onComplete = some})
+  fisica.addBody (obstaculo, "static",{bounce = 0.3,friction=0.5})
+  obstaculo.myName="obstaculos"
+
+--paredes do jogo
+local parede = display.newRect(0,-20,display.contentWidth,1)
+  fisica.addBody(parede,"static")
+  parede.myName="parede"
+  parede.alpha = 0
+local parede = display.newRect(0,510,display.contentWidth,1)
+  fisica.addBody(parede,"static")
+  parede.myName="parede"
+  parede.alpha = 0
+local parede = display.newRect(-20,0,1,display.contentHeight)
+  fisica.addBody(parede,"static")
+  parede.myName="parede"
+  parede.alpha = 0
+local parede = display.newRect(340,0,1,display.contentHeight)
+  fisica.addBody(parede,"static")
+  parede.myName="parede"
+  parede.alpha = 0
+
 -- carrega obstaculos em diferentes posições no jogo
 local function loadObstaculos()
 	numObstaculos = numObstaculos + 1
-	obstaculos[numObstaculos] = display.newImage("obs.png")
+	obstaculos[numObstaculos] = display.newImage("imagens/obs.png")
 	fisica.addBody (obstaculos[numObstaculos], "static",{bounce = 0.3,friction=0.5})
     local whereFrom = math.random(3)  --determinar a direção do asteróide irá aparecer
 	obstaculos[numObstaculos].myName = "obstaculos"
@@ -82,26 +95,6 @@ local function loadObstaculos()
      end
 end
 
-
--- função pontuação
-local function colisao(event)
-     if((event.object1.myName=="obstaculos" and event.object2.myName=="bola")
-	   or(event.object1.myName=="bola" and event.object2.myName=="obstaculos"))then
-         score=score+100
-		 updateTexto()
-	  end
-	  if((event.object1.myName=="topo" and event.object2.myName=="bola")
-		or(event.object1.myName=="bola" and event.object2.myName=="topo"))then
-          --event.object1:removeSelf()
-          --event.object1.myName=nil
-
-
-		  local lose = display.newText("GAME OVER!!", 30, 150, nil, 36)
-           lose:setTextColor(255,255,255)
-	   end
-end
-
-
 -- função para parada do personagem
 local function stop (event)
 	if event.phase =="ended" then
@@ -111,13 +104,13 @@ end
 Runtime:addEventListener("touch", stop )
 
 -- direcional esquerdo
-local setaEsq = display.newImage("seta.png")
+local setaEsq = display.newImage("imagens/seta.png")
 setaEsq.x = 45; setaEsq.y = 500;
 setaEsq.rotation = 180;
 
 -- direcional direito
-local setaDir = display.newImage("seta.png")
-setaDir.x = 280; setaDir.y = 500;
+local setaDir = display.newImage("imagens/seta.png")
+setaDir.x = 280; setaDir.y = 502;
 
 -- movimenta o personagem
 local function moveBola (event)
@@ -137,18 +130,42 @@ function setaDir:touch()
 end
 setaDir:addEventListener("touch",right)
 
+-- função pontuação
+local function colisao(event)
+     if((event.object1.myName=="obstaculos" and event.object2.myName=="bola")
+	   or(event.object1.myName=="bola" and event.object2.myName=="obstaculos"))then
+	     media.playEventSound("sounds/impacto.wav")
+         score=score+100
+		 updateTexto()
+	  end
+end
+
+local function  colisao2(event)
+   if((event.object1.myName=="parede" and event.object2.myName=="bola")
+		or(event.object1.myName=="bola" and event.object2.myName=="parede"))then
+		  media.playEventSound("sounds/destructe.wav")
+          --event.object1:removeSelf()
+          event.object1.myName=nil
+          bola.alpha = 0
+		  local lose = display.newText("GAME OVER!!", 30, 150, nil, 36)
+           lose:setTextColor(255,255,255)
+	end
+end
+
 -- loop do jogo
 local function loop()
    loadObstaculos()
-   if score > 1000 then
+   if score > 2000 then
 	   tempo = 6000
-       print("ok")
-	end
-	if score > 3000 then
-       tempo = 5000
-	 end
+	   --media.playEventSound("sounds/nivel.wav")
+    end
 	if score > 5000 then
+       tempo = 5000
+
+	 end
+	if score > 8000 then
 	   tempo = 4000
+
 	 end
     --[[elseif score> 10000 and tick > 250 then
        tick = 250
@@ -160,9 +177,11 @@ local function loop()
        tick = 100
     end]]
 end
+
 novoTexto()
 -- chama em tempo de execução o metodo colisao, especificando que é uma colisão entre dois objetos
 Runtime:addEventListener("collision", colisao)
+Runtime:addEventListener("collision", colisao2)
 -- metodo que define o delay para surgimento dos obstaculos
 timer.performWithDelay(tick,loop ,0)
 
