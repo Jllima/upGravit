@@ -33,7 +33,7 @@ function gameOver()
 	--end
 end
 
-function carregaPersonagem()
+local function carregaPersonagem()
     bola = display.newImage("imagens/bola.png")
     bola.x = display.contentWidth/2
     bola.y = 0
@@ -42,8 +42,69 @@ function carregaPersonagem()
     bola.myName="bola"
 end
 
- function updateTexto()
+local function updateTexto()
     textScore.text = "Score: "..score
+end
+
+function some2(self)
+    self.alpha = 0
+  end
+
+--primeiro obstaculo para impedir que a bola caia no inicio do jogo
+local function fistObs()
+    obstaculo = display.newImage("imagens/obs.png")
+    obstaculo.x = 157
+    obstaculo.y = 480
+    transition.to(obstaculo,{x= 157,y=-60, time = tempo,onComplete = some2})
+	fisica.addBody (obstaculo, "static",{bounce = 0.6,friction=0.1})
+    obstaculo.myName="obstaculos"
+end
+
+-- carrega obstaculos em diferentes posições no jogo
+local function loadObstaculos()
+
+    -- trocar newImage por newImageRect, possiblita redenrizar o tamanho de imagen de acordo com dispositivo(alteração)
+	numObstaculos = numObstaculos + 1
+	obstaculos[numObstaculos] = display.newImage("imagens/obs.png")
+	fisica.addBody (obstaculos[numObstaculos], "static",{bounce = 0.6,friction=0.1})
+    local whereFrom = math.random(3)  --determinar a direção do asteróide irá aparecer
+	obstaculos[numObstaculos].myName = "obstaculos"
+     -- condições para os obstaculos carregarem  no jogo
+     if (whereFrom == 1) then
+	   w = math.random(45,120)
+	   obstaculos[numObstaculos].x = w
+       obstaculos[numObstaculos].y = 480
+	   transition.to(obstaculos[numObstaculos],{x= w,y=-60, time = tempo,onComplete = some2})--onComplete = some--cosumindo memoria
+
+     elseif (whereFrom == 2) then
+	   w = math.random(157,200)
+	   obstaculos[numObstaculos].x = w
+       obstaculos[numObstaculos].y = 480
+       transition.to(obstaculos[numObstaculos],{x= w,y=-60, time = tempo,onComplete = some2})
+	   elseif (whereFrom == 3) then
+	    w = math.random(200, 280)
+	    obstaculos[numObstaculos].x = w
+        obstaculos[numObstaculos].y = 480
+        transition.to(obstaculos[numObstaculos],{x= w,y=-60, time = tempo,onComplete = some2})
+     end
+end
+
+-- função pontuação
+local function colisao(event)
+     if(event.phase == "began")then
+	     audio.play(somDeImpacto)-- chamar o som pre carregado
+         score=score+100
+		 updateTexto()
+	 end
+end
+
+local function  colisao2(event)
+   if((event.object1.myName=="parede" and event.object2.myName=="bola")
+		or(event.object1.myName=="bola" and event.object2.myName=="parede"))then
+		  audio.play(somDeGameOver)
+          event.object1.myName=nil
+		  gameOver()
+	end
 end
 
 -- Called when the scene's view does not exist:
@@ -100,10 +161,8 @@ end
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
     --print("Estou enterScene upGravit")
-    storyboard.purgeScene("menu")
-
-    fisica.start()
-
+  storyboard.purgeScene("menu")
+  fisica.start()
   motionx = 0
   speed = 2
   obstaculos = {}
@@ -111,49 +170,6 @@ function scene:enterScene( event )
   tick = 1200--1500 -- medida de tempo para cada obstaculo aparece
   w = 0 -- guarda a posição x
   tempo = 7000 -- guarda o tempo utilizado no transation
-
-
-  -- função utilizada no transation.to para retirar os obstaculos
-
-  function some2(self)
-    self.alpha = 0
-  end
-  --primeiro obstaculo para impedir que a bola caia no inicio do jogo
-  obstaculo = display.newImage("imagens/obs.png")
-  obstaculo.x = 157
-  obstaculo.y = 480
-  transition.to(obstaculo,{x= 157,y=-60, time = tempo,onComplete = some2})
-  fisica.addBody (obstaculo, "static",{bounce = 0.6,friction=0.1})
-  obstaculo.myName="obstaculos"
-
-  -- carrega obstaculos em diferentes posições no jogo
-  local function loadObstaculos()
-
-    -- trocar newImage por newImageRect, possiblita redenrizar o tamanho de imagen de acordo com dispositivo(alteração)
-	numObstaculos = numObstaculos + 1
-	obstaculos[numObstaculos] = display.newImage("imagens/obs.png")
-	fisica.addBody (obstaculos[numObstaculos], "static",{bounce = 0.6,friction=0.1})
-    local whereFrom = math.random(3)  --determinar a direção do asteróide irá aparecer
-	obstaculos[numObstaculos].myName = "obstaculos"
-     -- condições para os obstaculos carregarem  no jogo
-     if (whereFrom == 1) then
-	   w = math.random(45,120)
-	   obstaculos[numObstaculos].x = w
-       obstaculos[numObstaculos].y = 480
-	   transition.to(obstaculos[numObstaculos],{x= w,y=-60, time = tempo,onComplete = some2})--onComplete = some--cosumindo memoria
-
-     elseif (whereFrom == 2) then
-	   w = math.random(157,200)
-	   obstaculos[numObstaculos].x = w
-       obstaculos[numObstaculos].y = 480
-       transition.to(obstaculos[numObstaculos],{x= w,y=-60, time = tempo,onComplete = some2})
-	   elseif (whereFrom == 3) then
-	    w = math.random(200, 280)
-	    obstaculos[numObstaculos].x = w
-        obstaculos[numObstaculos].y = 480
-        transition.to(obstaculos[numObstaculos],{x= w,y=-60, time = tempo,onComplete = some2})
-     end
-  end
 
   -- função para parada do personagem
   function stop (event)
@@ -181,25 +197,7 @@ function scene:enterScene( event )
   end
   setaDir:addEventListener("touch",right)
 
-  -- função pontuação
-  local function colisao(event)
-     if(event.phase == "began")then
-	     audio.play(somDeImpacto)-- chamar o som pre carregado
-         score=score+100
-		 updateTexto()
-	 end
-  end
-
-  local function  colisao2(event)
-   if((event.object1.myName=="parede" and event.object2.myName=="bola")
-		or(event.object1.myName=="bola" and event.object2.myName=="parede"))then
-		  audio.play(somDeGameOver)
-          event.object1.myName=nil
-		  gameOver()
-	end
-  end
-
-  -- loop do jogo
+   -- loop do jogo
   local function loop()
    loadObstaculos()
    if score > 5000 then
@@ -224,8 +222,8 @@ function scene:enterScene( event )
        tick = 100
     end]]
   end
-
   carregaPersonagem()
+  fistObs()
   -- chama em tempo de execução o metodo colisao, especificando que é uma colisão entre dois objetos
   Runtime:addEventListener("collision", colisao)
   Runtime:addEventListener("collision", colisao2)
