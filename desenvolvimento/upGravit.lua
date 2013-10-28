@@ -13,11 +13,11 @@ local scene = storyboard.newScene()
 local   fisica = require("physics")
 fisica.start(); fisica.pause()
 fisica.setGravity(0, 9.0)
---fisica.setDrawMode("hybrid")
+fisica.setDrawMode("hybrid")
 
 
 local fundo,textScore,memTimer,bola,speed,obstaculos,numObstaculos,
-	   obstaculo,tick,w,tempo,score,setaEsq,setaDir--,somDeImpacto,somDeGameOver
+obstaculo,tick,w,tempo,score,setaEsq,setaDir--,somDeImpacto,somDeGameOver
 somDeImpacto = audio.loadSound("sounds/impacto.wav")
 somDeGameOver = audio.loadSound("sounds/destructe.wav")
 local masterVolume = audio.getVolume(somDeImpacto)
@@ -54,7 +54,7 @@ function some2(self)
 local function fistObs()
     obstaculo = display.newImage("imagens/obs.png")
     obstaculo.x = 157
-    obstaculo.y = 480
+    obstaculo.y = 530
     transition.to(obstaculo,{x= 157,y=-60, time = tempo,onComplete = some2})
 	fisica.addBody (obstaculo, "static",{bounce = 0.6,friction=0.1})
     obstaculo.myName="obstaculos"
@@ -73,18 +73,18 @@ local function loadObstaculos()
      if (whereFrom == 1) then
 	   w = math.random(45,120)
 	   obstaculos[numObstaculos].x = w
-       obstaculos[numObstaculos].y = 480
+       obstaculos[numObstaculos].y = 530
 	   transition.to(obstaculos[numObstaculos],{x= w,y=-60, time = tempo,onComplete = some2})--onComplete = some--cosumindo memoria
 
      elseif (whereFrom == 2) then
 	   w = math.random(157,200)
 	   obstaculos[numObstaculos].x = w
-       obstaculos[numObstaculos].y = 480
+       obstaculos[numObstaculos].y = 530
        transition.to(obstaculos[numObstaculos],{x= w,y=-60, time = tempo,onComplete = some2})
 	   elseif (whereFrom == 3) then
 	    w = math.random(200, 280)
 	    obstaculos[numObstaculos].x = w
-        obstaculos[numObstaculos].y = 480
+        obstaculos[numObstaculos].y = 530
         transition.to(obstaculos[numObstaculos],{x= w,y=-60, time = tempo,onComplete = some2})
      end
 end
@@ -122,17 +122,17 @@ function scene:createScene( event )
     screenGroup:insert( fundo)
 
 	score = 0
-    textScore = display.newText("Score: "..score, 240,-40, nil, 12)
+    textScore = display.newText("Score: "..score, 200,0, nil, 20)
     textScore:setTextColor(255,255,255)
 	screenGroup:insert( textScore )
 	-- direcional esquerdo
     setaEsq = display.newImage("imagens/seta.png")
-    setaEsq.x = 45; setaEsq.y = 500;
+    setaEsq.x = 45; setaEsq.y = 550;
     setaEsq.rotation = 180;
 	screenGroup:insert(setaEsq)
     -- direcional direito
     setaDir = display.newImage("imagens/seta.png")
-    setaDir.x = 280; setaDir.y = 502;
+    setaDir.x = 280; setaDir.y = 552;
 	screenGroup:insert(setaDir)
 
 	local parede = display.newRect(0,-40,display.contentWidth,1)
@@ -140,7 +140,7 @@ function scene:createScene( event )
     parede.myName="parede"
     parede.alpha = 0
 	screenGroup:insert(parede)
-    local parede = display.newRect(0,510,display.contentWidth,1)
+    local parede = display.newRect(0,570,display.contentWidth,1)
     fisica.addBody(parede,"static")
     parede.myName="parede"
     parede.alpha = 0

@@ -1,7 +1,7 @@
 application = {
 	content = {
 		width = 320,
-		height = 480,
+		height = 570,
 		scale = "letterBox",
 		audioPlayFrequency =  22050,
 		fps = 30,
@@ -14,14 +14,8 @@ application = {
            ["@2"] = 2,
           },
  }
-		--[[
-        imageSuffix = {
-		    ["@2x"] = 2,
-		}
-		--]]
 
-
-    --[[
+--[[
     -- Push notifications
 
     notification =
