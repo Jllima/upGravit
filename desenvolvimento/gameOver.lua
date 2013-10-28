@@ -3,23 +3,26 @@ local scene = storyboard.newScene()
 
 local widget = require "widget"
 -- declarações para a frente e outros locais
-local playBtn
+local playBtn,fundoGameOver
 
 local function menu()
 
 	-- ir para cena level1.lua
 
-	storyboard.gotoScene("menu")
+	storyboard.gotoScene("menu", "crossFade", 400)
 
 	return true	-- indica toque bem sucedida
 end
 
 function scene:createScene( event )
-  function gameOver()
-     local group = display.newGroup()
-    local fundoGameOver = display.newImage("imagens/gameOver.png")
+  --print("Estou createScene gameOver")
+
+	local group = display.newGroup()
+    fundoGameOver = display.newImage("imagens/gameOver.png")
+	fundoGameOver:setReferencePoint( display.TopLeftReferencePoint )
+	fundoGameOver.x, fundoGameOver.y = 0, 0
     playBtn = widget.newButton{
-		label="Jogar",
+		label="iniciar",
 		labelColor = { default={255}, over={128} },
 		defaultFile="imagens/button.png",
 		overFile="imagens/button-over.png",
@@ -28,26 +31,29 @@ function scene:createScene( event )
 	}
 	playBtn:setReferencePoint( display.CenterReferencePoint )
 	playBtn.x = display.contentWidth*0.5
-	playBtn.y = display.contentHeight - 125
+	playBtn.y = display.contentHeight - 185
 
 	group:insert(fundoGameOver)
 	group:insert( playBtn )
-    print("ok")
+
 	return true	-- indica toque bem sucedida
-  end
-  gameOver()
 
 end
   -- Chamado imediatamente após a cena mudou na tela:
 function scene:enterScene( event )
+    --print("Estou enterScene gameOver")
 	local group = self.view
+	storyboard.purgeScene("upGravit")
+
 
 	-- Inserir o código aqui (por exemplo, contadores de início, áudio carga, ouvintes de início, etc)
 end
 
   -- Chamado quando a cena está prestes a se mover fora da tela:
 function scene:exitScene( event )
+    --print("Estou existeScene gameOver")
 	local group = self.view
+	fundoGameOver:removeSelf()
 
 	-- Chamado quando a cena está prestes a se mover fora da tela:
 
@@ -55,6 +61,7 @@ end
 
   -- Se a visão de cena é removido, a cena: destroyScene () será chamado pouco antes:
 function scene:destroyScene( event )
+    --print("Estou destroyScene gameOver")
 	local group = self.view
 
 	if playBtn then

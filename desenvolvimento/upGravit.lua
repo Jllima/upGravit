@@ -10,8 +10,19 @@ local scene = storyboard.newScene()
 ---------------------------------------------------------------------------------
 -- BEGINNING OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
-local fisica,fundo,textScore,memTimer,bola,speed,obstaculos,numObstaculos,
-	   obstaculo,tick,w,tempo,score,setaEsq,setaDir,somDeImpacto,somDeGameOver
+local   fisica = require("physics")
+fisica.start(); fisica.pause()
+fisica.setGravity(0, 9.0)
+--fisica.setDrawMode("hybrid")
+
+
+local fundo,textScore,memTimer,bola,speed,obstaculos,numObstaculos,
+	   obstaculo,tick,w,tempo,score,setaEsq,setaDir--,somDeImpacto,somDeGameOver
+somDeImpacto = audio.loadSound("sounds/impacto.wav")
+somDeGameOver = audio.loadSound("sounds/destructe.wav")
+local masterVolume = audio.getVolume(somDeImpacto)
+
+
 
 function gameOver()
 	--if event.phase == "began" then
@@ -37,13 +48,13 @@ end
 
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
-	print("Estou createScene upGravit")
+	--print("Estou createScene upGravit")
     local screenGroup = self.view
 
-	fisica = require("physics")
+	--[[fisica = require("physics")
     fisica.start(); fisica.pause()
     fisica.setGravity(0, 9.0)
-    fisica.setDrawMode("hybrid")
+    --fisica.setDrawMode("hybrid")]]
 
 	fundo = display.newImage("imagens/fundo.png")
     fundo.y = display.contentHeight/2
@@ -88,7 +99,7 @@ end
 
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
-    print("Estou enterScene upGravit")
+    --print("Estou enterScene upGravit")
     storyboard.purgeScene("menu")
 
     fisica.start()
@@ -102,10 +113,6 @@ function scene:enterScene( event )
   tempo = 7000 -- guarda o tempo utilizado no transation
 
 
---Pre carregamento dos sons , para melhora de performance(alteração)
-  somDeImpacto = audio.loadSound("sounds/impacto.wav")
-  somDeGameOver = audio.loadSound("sounds/destructe.wav")
-
   -- função utilizada no transation.to para retirar os obstaculos
 
   function some2(self)
@@ -116,7 +123,7 @@ function scene:enterScene( event )
   obstaculo.x = 157
   obstaculo.y = 480
   transition.to(obstaculo,{x= 157,y=-60, time = tempo,onComplete = some2})
-  fisica.addBody (obstaculo, "static",{bounce = 0.6,friction=1.0,density=5.0})
+  fisica.addBody (obstaculo, "static",{bounce = 0.6,friction=0.1})
   obstaculo.myName="obstaculos"
 
   -- carrega obstaculos em diferentes posições no jogo
@@ -125,7 +132,7 @@ function scene:enterScene( event )
     -- trocar newImage por newImageRect, possiblita redenrizar o tamanho de imagen de acordo com dispositivo(alteração)
 	numObstaculos = numObstaculos + 1
 	obstaculos[numObstaculos] = display.newImage("imagens/obs.png")
-	fisica.addBody (obstaculos[numObstaculos], "static",{bounce = 0.3,friction=0.5})
+	fisica.addBody (obstaculos[numObstaculos], "static",{bounce = 0.6,friction=0.1})
     local whereFrom = math.random(3)  --determinar a direção do asteróide irá aparecer
 	obstaculos[numObstaculos].myName = "obstaculos"
      -- condições para os obstaculos carregarem  no jogo
@@ -176,24 +183,18 @@ function scene:enterScene( event )
 
   -- função pontuação
   local function colisao(event)
-     if((event.object1.myName=="obstaculos" and event.object2.myName=="bola")
-	   or(event.object1.myName=="bola" and event.object2.myName=="obstaculos"))then
-	     audio.play(somDeImpacto) -- chamar o som pre carregado
-		 --media.playEventSound("sounds/impacto.wav")
+     if(event.phase == "began")then
+	     audio.play(somDeImpacto)-- chamar o som pre carregado
          score=score+100
 		 updateTexto()
-
-	  end
+	 end
   end
 
   local function  colisao2(event)
    if((event.object1.myName=="parede" and event.object2.myName=="bola")
 		or(event.object1.myName=="bola" and event.object2.myName=="parede"))then
 		  audio.play(somDeGameOver)
-		  --media.playEventSound("sounds/destructe.wav")
-          --event.object1:removeSelf()
           event.object1.myName=nil
-          --bola.alpha = 0
 		  gameOver()
 	end
   end
@@ -201,15 +202,15 @@ function scene:enterScene( event )
   -- loop do jogo
   local function loop()
    loadObstaculos()
-   if score > 2000 then
+   if score > 5000 then
 	   tempo = 6000
 	   --media.playEventSound("sounds/nivel.wav")
     end
-	if score > 5000 then
+	if score > 8000 then
        tempo = 5000
 
 	 end
-	if score > 8000 then
+	if score > 12000 then
 	   tempo = 4000
 
 	 end
@@ -236,7 +237,9 @@ end
 
 -- Called when scene is about to move offscreen:
 function scene:exitScene(event)
-	print("Estou existScene upGravit")
+	--print("Estou existScene upGravit")
+	print(masterVolume)
+	print( result )
      local group = self.view
      --fisica.stop()
 	 Runtime:removeEventListener("touch", stop )
@@ -245,7 +248,11 @@ function scene:exitScene(event)
      Runtime:removeEventListener("collision", colisao2)
 	 bola:removeSelf()
 	 obstaculo:removeSelf()
+
 	 timer.cancel( memTimer ); memTimer = nil;
+
+	 --audio.dispose(somDeImpacto)
+	 --audio.dispose(somDeGameOver)
 	 --transition.cancel(transicao)
 
 	 for i=1,table.getn(obstaculos) do
@@ -260,9 +267,9 @@ end
 -- Called prior to the removal of scene's "view" (display group)
 function scene:destroyScene( event )
 
-	print("Estou destroyScene upGravit")
+	--[[print("Estou destroyScene upGravit")
 	package.loaded[fisica] = nil
-	fisica = nil
+	fisica = nil]]
 end
 
 ---------------------------------------------------------------------------------

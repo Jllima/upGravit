@@ -11,4 +11,5 @@ display.setStatusBar( display.HiddenStatusBar )
 local storyboard = require "storyboard"
 
 -- tela do menu de carga
-storyboard.gotoScene( "menu" )
+
+storyboard.gotoScene( "menu")

@@ -20,10 +20,11 @@ local function chamarUpGravit()
 
 	-- ir para cena level1.lua
 
-	storyboard.gotoScene( "upGravit", "fade", 500 )
+	storyboard.gotoScene( "upGravit", "crossFade", 500 )
 
 	return true	-- indica toque bem sucedida
 end
+
 
 -----------------------------------------------------------------------------------------
 -- INÍCIO DE SUA IMPLEMENTAÇÃO
@@ -35,6 +36,7 @@ end
 
 -- Chamado quando vista da cena não existe:
 function scene:createScene( event )
+	-- print("Estou createScene menu")
 	local group = self.view
 
 	-- exibir uma imagem de fundo
@@ -69,6 +71,8 @@ end
 
 -- Chamado imediatamente após a cena mudou na tela:
 function scene:enterScene( event )
+    --print("Estou enterScene menu")
+	storyboard.purgeScene("gameOver")
 	local group = self.view
 
 	-- Inserir o código aqui (por exemplo, contadores de início, áudio carga, ouvintes de início, etc)
@@ -77,6 +81,7 @@ end
 
 -- Chamado quando a cena está prestes a se mover fora da tela:
 function scene:exitScene( event )
+    print("Estou exitScene menu")
 	local group = self.view
 
 	-- Chamado quando a cena está prestes a se mover fora da tela:
@@ -85,6 +90,7 @@ end
 
 -- Se a visão de cena é removido, a cena: destroyScene () será chamado pouco antes:
 function scene:destroyScene( event )
+    --print("Estou destroyScene menu")
 	local group = self.view
 
 	if playBtn then
