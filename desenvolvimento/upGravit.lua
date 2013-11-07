@@ -13,13 +13,14 @@ local scene = storyboard.newScene()
 local   fisica = require("physics")
 fisica.start(); fisica.pause()
 fisica.setGravity(0, 9.0)
-fisica.setDrawMode("hybrid")
+--fisica.setDrawMode("hybrid")
 
 
 local fundo,textScore,memTimer,bola,speed,obstaculos,numObstaculos,
-obstaculo,tick,w,tempo,score,setaEsq,setaDir--,somDeImpacto,somDeGameOver
-somDeImpacto = audio.loadSound("sounds/impacto.wav")
-somDeGameOver = audio.loadSound("sounds/destructe.wav")
+obstaculo,tick,w,tempo,score,setaEsq,setaDir,nuvem,nuvem2,nuvem3
+
+--somDeImpacto = audio.loadSound("sounds/impacto.wav")
+--somDeGameOver = audio.loadSound("sounds/destructe.wav")
 local masterVolume = audio.getVolume(somDeImpacto)
 
 
@@ -106,6 +107,14 @@ local function  colisao2(event)
 		  gameOver()
 	end
 end
+-- função para movimentação das nuvens
+local function movimentaNuvem(self,event)
+    if self.x > 530 then
+	    self.x = -30
+	else
+	   self.x = self.x + self.speed
+	end
+end
 
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
@@ -155,6 +164,25 @@ function scene:createScene( event )
     parede.myName="parede"
     parede.alpha = 0
     screenGroup:insert(parede)
+
+	nuvem = display.newImage("imagens/NUVEM3.png")
+	nuvem:setReferencePoint(display.BottomRightReferencePoint)
+	nuvem.x = -50
+	nuvem.y = 200
+	nuvem.speed = 0.5
+	screenGroup:insert(nuvem)
+	nuvem2 = display.newImage("imagens/NUVEM2.png")
+	nuvem2:setReferencePoint(display.BottomRightReferencePoint)
+	nuvem2.x = -10
+	nuvem2.y = 350
+	nuvem2.speed = 1
+	screenGroup:insert(nuvem2)
+	nuvem3 = display.newImage("imagens/NUVEM1.png")
+	nuvem3:setReferencePoint(display.BottomRightReferencePoint)
+	nuvem3.x = -30
+	nuvem3.y = 500
+	nuvem3.speed = 0.7
+	screenGroup:insert(nuvem3)
 end
 
 
@@ -200,30 +228,39 @@ function scene:enterScene( event )
    -- loop do jogo
   local function loop()
    loadObstaculos()
-   if score > 5000 then
+   if score > 3000 then
 	   tempo = 6000
 	   --media.playEventSound("sounds/nivel.wav")
     end
-	if score > 8000 then
+	if score > 5000 then
        tempo = 5000
 
 	 end
-	if score > 12000 then
+	if score > 7000 then
 	   tempo = 4000
 
 	 end
-    --[[elseif score> 10000 and tick > 250 then
-       tick = 250
-    elseif score > 15000 and tick > 200 then
-       tick = 200
-    elseif score > 20000 and tick > 150 then
-       tick = 150
-    elseif score > 25000 and tick > 100 then
-       tick = 100
-    end]]
+	 if score > 10000 then
+	   tempo = 3000
+     end
+	 if score > 11000 then
+	   tempo = 2000
+     end
+    if score > 12000 then
+	   tempo = 1000
+     end
+
+
   end
   carregaPersonagem()
   fistObs()
+  -- chama em tempo de execução a função para movimentação das nuvens
+  nuvem.enterFrame = movimentaNuvem
+  Runtime:addEventListener("enterFrame", nuvem)
+  nuvem2.enterFrame = movimentaNuvem
+  Runtime:addEventListener("enterFrame", nuvem2)
+  nuvem3.enterFrame = movimentaNuvem
+  Runtime:addEventListener("enterFrame", nuvem3)
   -- chama em tempo de execução o metodo colisao, especificando que é uma colisão entre dois objetos
   Runtime:addEventListener("collision", colisao)
   Runtime:addEventListener("collision", colisao2)
@@ -242,6 +279,9 @@ function scene:exitScene(event)
      --fisica.stop()
 	 Runtime:removeEventListener("touch", stop )
 	 Runtime:removeEventListener("enterFrame", moveBola)
+	 Runtime:removeEventListener("enterFrame", nuvem)
+	 Runtime:removeEventListener("enterFrame", nuvem2)
+	 Runtime:removeEventListener("enterFrame", nuvem3)
 	 Runtime:removeEventListener("collision", colisao)
      Runtime:removeEventListener("collision", colisao2)
 	 bola:removeSelf()
