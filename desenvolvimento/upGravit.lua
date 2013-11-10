@@ -1,11 +1,12 @@
 ---------------------------------------------------------------------------------
 --
--- scene2.lua
+-- upGravit
 --
 ---------------------------------------------------------------------------------
 
 local storyboard = require( "storyboard" )
 local scene = storyboard.newScene()
+local sprite = require("sprite")
 
 ---------------------------------------------------------------------------------
 -- BEGINNING OF YOUR IMPLEMENTATION
@@ -15,16 +16,16 @@ fisica.start(); fisica.pause()
 fisica.setGravity(0, 9.0)
 --fisica.setDrawMode("hybrid")
 
-
+-- Carregar variaveis
 local fundo,textScore,memTimer,bola,speed,obstaculos,numObstaculos,
-obstaculo,tick,w,tempo,score,setaEsq,setaDir,nuvem,nuvem2,nuvem3
+obstaculo,tick,w,tempo,score,setaEsq,setaDir,nuvem,nuvem2,nuvem3,sheet1,spriteSet1
 
---somDeImpacto = audio.loadSound("sounds/impacto.wav")
---somDeGameOver = audio.loadSound("sounds/destructe.wav")
+somDeImpacto = audio.loadSound("sounds/impacto.wav")
+somDeGameOver = audio.loadSound("sounds/destructe.wav")
 local masterVolume = audio.getVolume(somDeImpacto)
 
 
-
+-- função para game over
 function gameOver()
 	--if event.phase == "began" then
 
@@ -33,20 +34,21 @@ function gameOver()
 		return true
 	--end
 end
-
+-- função para carregar o personagem
 local function carregaPersonagem()
-    bola = display.newImage("imagens/bola.png")
-    bola.x = display.contentWidth/2
-    bola.y = 0
+    sheet1 = graphics.newImageSheet( "imagens/sprites2.png", { width=35, height=35, numFrames=3})
+    bola = display.newSprite(sheet1,{name="man", start=1, count=3, time=500,loopCount=1} )
+	bola.x = display.contentWidth/2
+	bola.y = 0
     fisica.addBody(bola, {bounce=0.6, friction=0.1,radius = 20})
 	bola.isFixedRotation = true
     bola.myName="bola"
 end
-
+-- atualizar o escores na tela
 local function updateTexto()
     textScore.text = "Score: "..score
 end
-
+-- fazer os obdtaculos sumirem
 function some2(self)
     self.alpha = 0
   end
@@ -63,7 +65,6 @@ end
 
 -- carrega obstaculos em diferentes posições no jogo
 local function loadObstaculos()
-
     -- trocar newImage por newImageRect, possiblita redenrizar o tamanho de imagen de acordo com dispositivo(alteração)
 	numObstaculos = numObstaculos + 1
 	obstaculos[numObstaculos] = display.newImage("imagens/obs.png")
@@ -76,7 +77,6 @@ local function loadObstaculos()
 	   obstaculos[numObstaculos].x = w
        obstaculos[numObstaculos].y = 530
 	   transition.to(obstaculos[numObstaculos],{x= w,y=-60, time = tempo,onComplete = some2})--onComplete = some--cosumindo memoria
-
      elseif (whereFrom == 2) then
 	   w = math.random(157,200)
 	   obstaculos[numObstaculos].x = w
@@ -94,11 +94,13 @@ end
 local function colisao(event)
      if(event.phase == "began")then
 	     audio.play(somDeImpacto)-- chamar o som pre carregado
+		 --bola:prepare("walk")
+		 bola:play()
          score=score+100
 		 updateTexto()
 	 end
 end
-
+-- função para game over
 local function  colisao2(event)
    if((event.object1.myName=="parede" and event.object2.myName=="bola")
 		or(event.object1.myName=="bola" and event.object2.myName=="parede"))then
@@ -120,11 +122,6 @@ end
 function scene:createScene( event )
 	--print("Estou createScene upGravit")
     local screenGroup = self.view
-
-	--[[fisica = require("physics")
-    fisica.start(); fisica.pause()
-    fisica.setGravity(0, 9.0)
-    --fisica.setDrawMode("hybrid")]]
 
 	fundo = display.newImage("imagens/fundo.png")
     fundo.y = display.contentHeight/2
@@ -169,30 +166,33 @@ function scene:createScene( event )
 	nuvem:setReferencePoint(display.BottomRightReferencePoint)
 	nuvem.x = -50
 	nuvem.y = 200
-	nuvem.speed = 0.5
+	nuvem.speed = 0.2
 	screenGroup:insert(nuvem)
 	nuvem2 = display.newImage("imagens/NUVEM2.png")
 	nuvem2:setReferencePoint(display.BottomRightReferencePoint)
 	nuvem2.x = -10
 	nuvem2.y = 350
-	nuvem2.speed = 1
+	nuvem2.speed = 0.4
 	screenGroup:insert(nuvem2)
 	nuvem3 = display.newImage("imagens/NUVEM1.png")
 	nuvem3:setReferencePoint(display.BottomRightReferencePoint)
 	nuvem3.x = -30
 	nuvem3.y = 500
-	nuvem3.speed = 0.7
+	nuvem3.speed = 0.3
 	screenGroup:insert(nuvem3)
 end
 
 
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
-    --print("Estou enterScene upGravit")
+  --print("Estou enterScene upGravit")
   storyboard.purgeScene("menu")
   fisica.start()
+
+  --variaveis de movimentação
   motionx = 0
   speed = 2
+  --array de obstaculos
   obstaculos = {}
   numObstaculos = 0 -- variavel para contagem de obstaculos
   tick = 1200--1500 -- medida de tempo para cada obstaculo aparece
@@ -249,9 +249,8 @@ function scene:enterScene( event )
     if score > 12000 then
 	   tempo = 1000
      end
-
-
   end
+
   carregaPersonagem()
   fistObs()
   -- chama em tempo de execução a função para movimentação das nuvens
@@ -311,7 +310,7 @@ function scene:destroyScene( event )
 end
 
 ---------------------------------------------------------------------------------
--- END OF YOUR IMPLEMENTATION
+-- fim da implementação
 ---------------------------------------------------------------------------------
 
 -- "createScene" event is dispatched if scene's view does not exist

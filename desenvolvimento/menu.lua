@@ -7,6 +7,7 @@
 local storyboard = require( "storyboard" )
 local scene = storyboard.newScene()
 
+
 -- incluem biblioteca de "widget" de Corona
 local widget = require "widget"
 
@@ -15,15 +16,18 @@ local widget = require "widget"
 -- declarações para a frente e outros locais
 local playBtn
 
+
 -- 'onRelease "ouvinte de eventos para playBtn
 local function chamarUpGravit()
-
-	-- ir para cena level1.lua
-
-	storyboard.gotoScene( "upGravit", "crossFade", 500 )
-
-	return true	-- indica toque bem sucedida
+    storyboard.gotoScene( "upGravit", "crossFade", 500 )
+    return true	-- indica toque bem sucedida
 end
+
+local function chamarOpcoes()
+    storyboard.gotoScene( "opcoes", "crossFade", 500 )
+    return true	-- indica toque bem sucedida
+end
+
 
 
 -----------------------------------------------------------------------------------------
@@ -37,6 +41,7 @@ end
 -- Chamado quando vista da cena não existe:
 function scene:createScene( event )
 	-- print("Estou createScene menu")
+
 	local group = self.view
 
 	-- exibir uma imagem de fundo
@@ -61,18 +66,34 @@ function scene:createScene( event )
 	}
 	playBtn:setReferencePoint( display.CenterReferencePoint )
 	playBtn.x = display.contentWidth*0.5
-	playBtn.y = display.contentHeight - 125
+	playBtn.y = display.contentHeight - 200
+
+	-- criar um botão widget (que carrega upGravit.lua em chamarUpGravit)
+	playBtn2 = widget.newButton{
+		label="Opcoes",
+		labelColor = { default={255}, over={128} },
+		defaultFile="imagens/button.png",
+		overFile="imagens/button-over.png",
+		width=154, height=40,
+		onRelease =chamarOpcoes	-- função de ouvinte de evento
+	}
+	playBtn2:setReferencePoint( display.CenterReferencePoint )
+	playBtn2.x = display.contentWidth*0.5
+	playBtn2.y = display.contentHeight - 125
 
 	-- todos os objetos de exibição deve ser inserido no grupo
 	group:insert( background )
 	--group:insert( titleLogo )
 	group:insert( playBtn )
+	group:insert( playBtn2 )
+
 end
 
 -- Chamado imediatamente após a cena mudou na tela:
 function scene:enterScene( event )
     --print("Estou enterScene menu")
 	storyboard.purgeScene("gameOver")
+	storyboard.purgeScene("opcoes")
 	local group = self.view
 
 	-- Inserir o código aqui (por exemplo, contadores de início, áudio carga, ouvintes de início, etc)
@@ -96,6 +117,10 @@ function scene:destroyScene( event )
 	if playBtn then
 		playBtn:removeSelf()	-- widgets de devem ser removidos manualmente
 		playBtn = nil
+	end
+	if playBtn2 then
+		playBtn2:removeSelf()	-- widgets de devem ser removidos manualmente
+		playBtn2 = nil
 	end
 end
 
