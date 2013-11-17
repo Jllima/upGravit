@@ -1,23 +1,26 @@
 local storyboard = require( "storyboard" )
 local scene = storyboard.newScene()
+local banco = require("banco")
 
 local widget = require "widget"
 -- declarações para a frente e outros locais
-local playBtn,fundoGameOver
+local playBtn,fundoGameOver, pontos,textoPoint
 
 local function menu()
 
 	-- ir para cena level1.lua
 
-	storyboard.gotoScene("menu", "crossFade", 400)
+	storyboard.gotoScene("menu", "slideUp", 400)
 
 	return true	-- indica toque bem sucedida
 end
 
 function scene:createScene( event )
   --print("Estou createScene gameOver")
+    local group = self.view
+	pontos = banco.lista()
+    textoPoint = display.newText(pontos, 34, 30 , native.systemFont, 18)
 
-	local group = display.newGroup()
     fundoGameOver = display.newImage("imagens/gameOver.png")
 	fundoGameOver:setReferencePoint( display.TopLeftReferencePoint )
 	fundoGameOver.x, fundoGameOver.y = 0, 0
@@ -35,7 +38,7 @@ function scene:createScene( event )
 
 	group:insert(fundoGameOver)
 	group:insert( playBtn )
-
+    group:insert(textoPoint)
 	return true	-- indica toque bem sucedida
 
 end
@@ -44,8 +47,6 @@ function scene:enterScene( event )
     --print("Estou enterScene gameOver")
 	local group = self.view
 	storyboard.purgeScene("upGravit")
-
-
 	-- Inserir o código aqui (por exemplo, contadores de início, áudio carga, ouvintes de início, etc)
 end
 
@@ -53,10 +54,7 @@ end
 function scene:exitScene( event )
     --print("Estou existeScene gameOver")
 	local group = self.view
-	fundoGameOver:removeSelf()
-
 	-- Chamado quando a cena está prestes a se mover fora da tela:
-
 end
 
   -- Se a visão de cena é removido, a cena: destroyScene () será chamado pouco antes:

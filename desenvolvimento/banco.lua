@@ -1,49 +1,47 @@
 module(..., package.seeall)
+sqlite = require ( "sqlite3" )
 
---Include sqlite
-  require "sqlite3"
-
-
-function criarDB()
-
-  --Open data.db.  If the file doesn't exist it will be created
-  local path = system.pathForFile("data1.db", system.DocumentsDirectory)
-  db = sqlite3.open( path )
-
-  --Handle the applicationExit event to close the db
-  local function onSystemEvent( event )
-        if( event.type == "applicationExit" ) then
-            db:close()
-        end
-  end
-
-  --Setup the table if it doesn't exist
-  local tablesetup = [[CREATE TABLE IF NOT EXISTS jogador(id INTEGER PRIMARY KEY, content, content2);]]
-  print(tablesetup)
-  db:exec( tablesetup )
-
-  --Add rows with a auto index in 'id'. You don't need to specify a set of values because we're populating all of them
-  local testvalue = {}
-  testvalue[1] = 'Hello'
-  testvalue[2] = 'World'
-  testvalue[3] = 'Lua'
-  local tablefill =[[INSERT INTO test VALUES (NULL, ']]..testvalue[1]..[[',']]..testvalue[2]..[['); ]]
-  local tablefill2 =[[INSERT INTO test VALUES (NULL, ']]..testvalue[2]..[[',']]..testvalue[1]..[['); ]]
-  local tablefill3 =[[INSERT INTO test VALUES (NULL, ']]..testvalue[1]..[[',']]..testvalue[3]..[['); ]]
-  db:exec( tablefill )
-  db:exec( tablefill2 )
-  db:exec( tablefill3 )
-
-  --print the sqlite version to the terminal
-  print( "version " .. sqlite3.version() )
-
-  --print all the table contents
-  for row in db:nrows("SELECT * FROM jogador") do
-   local text = row.content.." "..row.content2
-   local t = display.newText(text, 20, 120 + (20 * row.id), native.systemFont, 16)
-   t:setTextColor(255,0,255)
-  end
-
-  --setup the system listener to catch applicationExit
-  Runtime:addEventListener( "system", onSystemEvent )
+function criarBd()
+   path = system.pathForFile("banco.db", system.DocumentsDirectory)
+   db = sqlite.open( path )
+   db:exec( "CREATE TABLE IF NOT EXISTS tabela (id INTEGER PRIMARY KEY, score INTEGER);" )
+   print("O banco foi criado")
 end
+
+function insere(score)
+   insert = "INSERT INTO tabela VALUES (NULL, '" .. score .. "' );" -- Concatena o parametro "score" na variavel "insert"
+   db:exec( insert ) -- Executa a inserção no banco
+   print("inserido")
+end
+
+function atualiza(score)
+   update = "UPDATE tabela SET score = '"..score.."' WHERE ID = 1;"
+   db:exec(update)
+   print("atulizado")
+end
+
+function lista()
+   local point
+   for row in db:nrows("SELECT score FROM tabela WHERE ID = 1;") do
+    --txId   = display.newText(row.id .. " - ", 10, 30 * row.id, native.systemFont, 18) -- Texto que mostra o "id"
+	--txNome = display.newText(row.score, 34, 30 , native.systemFont, 18) -- Texto que mostra o "nome"
+	point = row.score
+   end
+   return point
+end
+
+function fecharBd()
+    db:exec( "DROP TABLE tabela;")
+	--db:close()
+
+	print("tabela desfeita")
+end
+
+function onSystemEvent( event )
+	if( event.type == "applicationExit" ) then
+	  db:close()
+	end
+	print("banco fechou")
+end
+
+Runtime:addEventListener( "system", onSystemEvent )

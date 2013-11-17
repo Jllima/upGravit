@@ -6,7 +6,7 @@
 
 local storyboard = require( "storyboard" )
 local scene = storyboard.newScene()
-
+local banco = require("banco")
 
 -- incluem biblioteca de "widget" de Corona
 local widget = require "widget"
@@ -15,16 +15,21 @@ local widget = require "widget"
 
 -- declarações para a frente e outros locais
 local playBtn
+opcao = 0
 
 
 -- 'onRelease "ouvinte de eventos para playBtn
 local function chamarUpGravit()
-    storyboard.gotoScene( "upGravit", "crossFade", 500 )
+    if (opcao == 1 or opcao == 0) then
+      storyboard.gotoScene( "upGravit", "crossFade", 500 )
+	elseif(opcao == 2)then
+	  storyboard.gotoScene( "upGravitMovimento", "crossFade", 500 )
+	end
     return true	-- indica toque bem sucedida
 end
 
 local function chamarOpcoes()
-    storyboard.gotoScene( "opcoes", "crossFade", 500 )
+    storyboard.gotoScene( "opcoes", "slideLeft", 500 )
     return true	-- indica toque bem sucedida
 end
 
@@ -66,7 +71,7 @@ function scene:createScene( event )
 	}
 	playBtn:setReferencePoint( display.CenterReferencePoint )
 	playBtn.x = display.contentWidth*0.5
-	playBtn.y = display.contentHeight - 200
+	playBtn.y = display.contentHeight - 125
 
 	-- criar um botão widget (que carrega upGravit.lua em chamarUpGravit)
 	playBtn2 = widget.newButton{
@@ -79,7 +84,7 @@ function scene:createScene( event )
 	}
 	playBtn2:setReferencePoint( display.CenterReferencePoint )
 	playBtn2.x = display.contentWidth*0.5
-	playBtn2.y = display.contentHeight - 125
+	playBtn2.y = display.contentHeight - 70
 
 	-- todos os objetos de exibição deve ser inserido no grupo
 	group:insert( background )
@@ -95,6 +100,7 @@ function scene:enterScene( event )
 	storyboard.purgeScene("gameOver")
 	storyboard.purgeScene("opcoes")
 	local group = self.view
+	--banco.fecharBd()
 
 	-- Inserir o código aqui (por exemplo, contadores de início, áudio carga, ouvintes de início, etc)
 
@@ -102,7 +108,7 @@ end
 
 -- Chamado quando a cena está prestes a se mover fora da tela:
 function scene:exitScene( event )
-    print("Estou exitScene menu")
+    --print("Estou exitScene menu")
 	local group = self.view
 
 	-- Chamado quando a cena está prestes a se mover fora da tela:

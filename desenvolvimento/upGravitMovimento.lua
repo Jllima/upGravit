@@ -7,7 +7,7 @@
 local storyboard = require( "storyboard" )
 local scene = storyboard.newScene()
 local sprite = require("sprite")
-local banco = require("banco")
+
 ---------------------------------------------------------------------------------
 -- BEGINNING OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
@@ -18,9 +18,9 @@ fisica.setGravity(0, 9.0)
 local isSimulator = "simulator" == system.getInfo("environment")
 
 -- Carregar variaveis
-local fundo,textScore,memTimer,bola,speed,obstaculos,numObstaculos,score,
-obstaculo,tick,w,tempo,setaEsq,setaDir,nuvem,nuvem2,nuvem3,sheet1,spriteSet1
-local pontos
+local fundo,textScore,memTimer,bola,speed,obstaculos,numObstaculos,
+obstaculo,tick,w,tempo,score,setaEsq,setaDir,nuvem,nuvem2,nuvem3,sheet1,spriteSet1
+
 somDeImpacto = audio.loadSound("sounds/impacto.wav")
 somDeGameOver = audio.loadSound("sounds/destructe.wav")
 local masterVolume = audio.getVolume(somDeImpacto)
@@ -103,16 +103,11 @@ local function colisao(event)
 end
 -- função para game over
 local function  colisao2(event)
-
    if((event.object1.myName=="parede" and event.object2.myName=="bola")
 		or(event.object1.myName=="bola" and event.object2.myName=="parede"))then
 		  audio.play(somDeGameOver)
           event.object1.myName=nil
-		  if(score > pontos)then
-	        banco.atualiza(score)
-	      end
-		  --banco.insere(score)
-	      gameOver()
+		  gameOver()
 	end
 end
 -- função para movimentação das nuvens
@@ -123,6 +118,26 @@ local function movimentaNuvem(self,event)
 	   self.x = self.x + self.speed
 	end
 end
+--[[
+local function onAccelerate( event )
+
+	-- Format and display the Accelerator values
+	--
+	xyzFormat( xg, event.xGravity)
+	xyzFormat( yg, event.yGravity)
+	xyzFormat( zg, event.zGravity)
+	xyzFormat( xi, event.xInstant)
+	xyzFormat( yi, event.yInstant)
+	xyzFormat( zi, event.zInstant)
+
+	frameUpdate = false		-- update done
+
+	-- Move our object based on the accelerator values
+	--
+	bola.x = centerX + (centerX * event.xGravity)
+	bola.y = centerY + (centerY * event.yGravity * -1)
+
+end]]
 
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
@@ -135,11 +150,10 @@ function scene:createScene( event )
     screenGroup:insert( fundo)
 
 	score = 0
-
     textScore = display.newText("Score: "..score, 200,0, nil, 20)
     textScore:setTextColor(0,0,255)
 	screenGroup:insert( textScore )
-	-- direcional esquerdo
+	--[[ direcional esquerdo
     setaEsq = display.newImage("imagens/seta.png")
     setaEsq.x = 45; setaEsq.y = 550;
     setaEsq.rotation = 180;
@@ -148,7 +162,7 @@ function scene:createScene( event )
     setaDir = display.newImage("imagens/seta.png")
     setaDir.x = 280; setaDir.y = 552;
 	screenGroup:insert(setaDir)
-
+    ]]
 	local parede = display.newRect(0,-40,display.contentWidth,1)
     fisica.addBody(parede,"static")
     parede.myName="parede"
@@ -197,10 +211,6 @@ function scene:enterScene( event )
   storyboard.purgeScene("menu")
   fisica.start()
 
-  if (pontos == nil)then
-     banco.insere(score)
-  end
-  pontos = banco.lista()
   --variaveis de movimentação
   motionx = 0
   speed = 3
@@ -211,7 +221,7 @@ function scene:enterScene( event )
   w = 0 -- guarda a posição x
   tempo = 7000 -- guarda o tempo utilizado no transation
 
-  -- função para parada do personagem
+  --[[ função para parada do personagem
   function stop (event)
 	if event.phase =="ended" then
 		motionx = 0;
@@ -236,7 +246,7 @@ function scene:enterScene( event )
 	motionx = speed;
   end
   setaDir:addEventListener("touch",right)
-
+  ]]
    -- loop do jogo
   local function loop()
    loadObstaculos()
@@ -285,11 +295,13 @@ end
 -- Called when scene is about to move offscreen:
 function scene:exitScene(event)
 	--print("Estou existScene upGravit")
+	print(masterVolume)
+	print( result )
      local group = self.view
      --fisica.stop()
 	 --Runtime:removeEventListener("accelerometer", onAccelerate);
-	 Runtime:removeEventListener("touch", stop )
-	 Runtime:removeEventListener("enterFrame", moveBola)
+	 --Runtime:removeEventListener("touch", stop )
+	 --Runtime:removeEventListener("enterFrame", moveBola)
 	 Runtime:removeEventListener("enterFrame", nuvem)
 	 Runtime:removeEventListener("enterFrame", nuvem2)
 	 Runtime:removeEventListener("enterFrame", nuvem3)

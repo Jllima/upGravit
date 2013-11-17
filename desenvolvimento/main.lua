@@ -14,4 +14,4 @@ local banco = require("banco")
 -- tela do menu de carga
 
 storyboard.gotoScene( "menu")
-banco.criarDB()
+banco.criarBd()

@@ -1,8 +1,8 @@
 application = {
 	content = {
-		width = 320,
-		height = 570,
-		scale = "letterBox",
+		width = 320,--540,
+		height = 570,--960,
+		scale = "letterBox",--"zoomStretch",
 		audioPlayFrequency =  22050,
 		fps = 30,
 		antialias = false,
