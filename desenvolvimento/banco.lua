@@ -1,6 +1,6 @@
 module(..., package.seeall)
 sqlite = require ( "sqlite3" )
-
+local pontos
 function criarBd()
    path = system.pathForFile("banco.db", system.DocumentsDirectory)
    db = sqlite.open( path )
@@ -17,7 +17,7 @@ end
 function atualiza(score)
    update = "UPDATE tabela SET score = '"..score.."' WHERE ID = 1;"
    db:exec(update)
-   print("atulizado")
+   print("atualizado")
 end
 
 function lista()
@@ -35,6 +35,14 @@ function fecharBd()
 	--db:close()
 
 	print("tabela desfeita")
+end
+
+function setScore(pontos)
+    score = pontos
+end
+
+function getScore()
+    return score
 end
 
 function onSystemEvent( event )

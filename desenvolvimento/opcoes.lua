@@ -30,7 +30,7 @@ function scene:createScene( event )
   group:insert(theBest)
 
   pontos = banco.lista()
-  textoPoint = display.newText(pontos, w*0.5, h - 200 , native.systemFont, 18)
+  textoPoint = display.newText(pontos, w*0.4, h - 250 , native.systemFontBold, 18)
 
 
   label1 = display.newText( "Opcoes", 20, 30, native.systemFontBold, 20 )
@@ -51,7 +51,7 @@ function scene:createScene( event )
   }
   playBtn:setReferencePoint( display.CenterReferencePoint )
   playBtn.x = w*0.5
-  playBtn.y = h - 125
+  playBtn.y = h - 100
 
   touch = widget.newButton{
 		label="touch",
@@ -91,7 +91,7 @@ end
 function scene:exitScene( event )
 
 	local group = self.view
-	label1:removeSelf()
+	--label1:removeSelf()
 end
 
 

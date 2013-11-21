@@ -13,5 +13,9 @@ local banco = require("banco")
 
 -- tela do menu de carga
 
-storyboard.gotoScene( "menu")
+storyboard.gotoScene("menu")
 banco.criarBd()
+local pontos = banco.lista()
+if (pontos == nil )then
+  banco.insere(0)
+end

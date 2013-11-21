@@ -3,8 +3,10 @@ local scene = storyboard.newScene()
 local banco = require("banco")
 
 local widget = require "widget"
--- declarações para a frente e outros locais
-local playBtn,fundoGameOver, pontos,textoPoint
+
+local playBtn,fundoGameOver, pontos,textoPoint,textoPoint2,record
+local w = display.contentWidth
+local h = display.contentHeight
 
 local function menu()
 
@@ -18,27 +20,29 @@ end
 function scene:createScene( event )
   --print("Estou createScene gameOver")
     local group = self.view
-	pontos = banco.lista()
-    textoPoint = display.newText(pontos, 34, 30 , native.systemFont, 18)
-
+	pontos = banco.getScore()
+	record = banco.lista()
+    textoPoint = display.newText("Pontos: "..pontos, w*0.3, h/2, native.systemFont, 25)
+    textoPoint2 = display.newText("Record: "..record, w*0.3, h - 250, native.systemFont, 25)
     fundoGameOver = display.newImage("imagens/gameOver.png")
 	fundoGameOver:setReferencePoint( display.TopLeftReferencePoint )
-	fundoGameOver.x, fundoGameOver.y = 0, 0
+	fundoGameOver.x, fundoGameOver.y = 0,0
     playBtn = widget.newButton{
 		label="iniciar",
 		labelColor = { default={255}, over={128} },
 		defaultFile="imagens/button.png",
 		overFile="imagens/button-over.png",
-		width=154, height=40,
+		width=154, height=50,
 		onRelease = menu	-- função de ouvinte de evento
 	}
 	playBtn:setReferencePoint( display.CenterReferencePoint )
 	playBtn.x = display.contentWidth*0.5
-	playBtn.y = display.contentHeight - 185
+	playBtn.y = display.contentHeight - 140
 
 	group:insert(fundoGameOver)
 	group:insert( playBtn )
     group:insert(textoPoint)
+	group:insert(textoPoint2)
 	return true	-- indica toque bem sucedida
 
 end
@@ -47,6 +51,7 @@ function scene:enterScene( event )
     --print("Estou enterScene gameOver")
 	local group = self.view
 	storyboard.purgeScene("upGravit")
+	storyboard.purgeScene("upGravitMovimento")
 	-- Inserir o código aqui (por exemplo, contadores de início, áudio carga, ouvintes de início, etc)
 end
 

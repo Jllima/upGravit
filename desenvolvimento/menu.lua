@@ -16,7 +16,7 @@ local widget = require "widget"
 -- declarações para a frente e outros locais
 local playBtn
 opcao = 0
-
+print("menu")
 
 -- 'onRelease "ouvinte de eventos para playBtn
 local function chamarUpGravit()

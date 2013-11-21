@@ -7,41 +7,37 @@
 local storyboard = require( "storyboard" )
 local scene = storyboard.newScene()
 local sprite = require("sprite")
-
+local banco = require("banco")
 ---------------------------------------------------------------------------------
 -- BEGINNING OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
-local   fisica = require("physics")
-fisica.start(); fisica.pause()
-fisica.setGravity(0, 9.0)
---fisica.setDrawMode("hybrid")
-local isSimulator = "simulator" == system.getInfo("environment")
+local   fiscaAcc = require("physics")
+fiscaAcc.start(); fiscaAcc.pause()
 
+--fiscaAcc.setDrawMode("hybrid")
 -- Carregar variaveis
-local fundo,textScore,memTimer,bola,speed,obstaculos,numObstaculos,
-obstaculo,tick,w,tempo,score,setaEsq,setaDir,nuvem,nuvem2,nuvem3,sheet1,spriteSet1
-
+local fundo,textScore,memTimer,bola,speed,obstaculos,numObstaculos,score,pontos,
+       obstaculo,tick,w,tempo,setaEsq,setaDir,nuvem,nuvem2,nuvem3,sheet1,spriteSet1
 somDeImpacto = audio.loadSound("sounds/impacto.wav")
 somDeGameOver = audio.loadSound("sounds/destructe.wav")
 local masterVolume = audio.getVolume(somDeImpacto)
-
-
+local wx = display.contentWidth
+local h = display.contentHeight
+print("upGravitMovimento")
 -- função para game over
 function gameOver()
 	--if event.phase == "began" then
-
-		storyboard.gotoScene( "gameOver", "crossFade", 400 )--"gameOver"
-
-		return true
+    storyboard.gotoScene( "gameOver", "crossFade", 400 )--"gameOver"
+    return true
 	--end
 end
 -- função para carregar o personagem
 local function carregaPersonagem()
     sheet1 = graphics.newImageSheet( "imagens/sprites2.png", { width=35, height=35, numFrames=3})
-    bola = display.newSprite(sheet1,{name="man", start=1, count=3, time=500,loopCount=1} )
-	bola.x = display.contentWidth/2
+    bola = display.newSprite(sheet1,{name="man", start=1, count=3, time=300,loopCount=1} )
+	bola.x = wx/2
 	bola.y = 0
-    fisica.addBody(bola, {bounce=0.6, friction=0.1,radius = 20})
+    fiscaAcc.addBody(bola, {bounce=0.6, friction=0.1,radius = 20})
 	bola.isFixedRotation = true
     bola.myName="bola"
 end
@@ -50,17 +46,17 @@ local function updateTexto()
     textScore.text = "Score: "..score
 end
 -- fazer os obdtaculos sumirem
-function some2(self)
+local function some2(self)
     self.alpha = 0
   end
 
 --primeiro obstaculo para impedir que a bola caia no inicio do jogo
 local function fistObs()
     obstaculo = display.newImage("imagens/obs.png")
-    obstaculo.x = 157
-    obstaculo.y = 530
+    obstaculo.x = wx/2
+    obstaculo.y = h - 40
     transition.to(obstaculo,{x= 157,y=-60, time = tempo,onComplete = some2})
-	fisica.addBody (obstaculo, "static",{bounce = 0.6,friction=0.1})
+	fiscaAcc.addBody (obstaculo, "static",{bounce = 0.6,friction=0.1})
     obstaculo.myName="obstaculos"
 end
 
@@ -69,24 +65,24 @@ local function loadObstaculos()
     -- trocar newImage por newImageRect, possiblita redenrizar o tamanho de imagen de acordo com dispositivo(alteração)
 	numObstaculos = numObstaculos + 1
 	obstaculos[numObstaculos] = display.newImage("imagens/obs.png")
-	fisica.addBody (obstaculos[numObstaculos], "static",{bounce = 0.6,friction=0.1})
+	fiscaAcc.addBody (obstaculos[numObstaculos], "static",{bounce = 0.6,friction=0.1})
     local whereFrom = math.random(3)  --determinar a direção do asteróide irá aparecer
 	obstaculos[numObstaculos].myName = "obstaculos"
      -- condições para os obstaculos carregarem  no jogo
      if (whereFrom == 1) then
 	   w = math.random(45,120)
 	   obstaculos[numObstaculos].x = w
-       obstaculos[numObstaculos].y = 530
+       obstaculos[numObstaculos].y = h - 40
 	   transition.to(obstaculos[numObstaculos],{x= w,y=-60, time = tempo,onComplete = some2})--onComplete = some--cosumindo memoria
      elseif (whereFrom == 2) then
 	   w = math.random(157,200)
 	   obstaculos[numObstaculos].x = w
-       obstaculos[numObstaculos].y = 530
+       obstaculos[numObstaculos].y = h - 40
        transition.to(obstaculos[numObstaculos],{x= w,y=-60, time = tempo,onComplete = some2})
 	   elseif (whereFrom == 3) then
 	    w = math.random(200, 280)
 	    obstaculos[numObstaculos].x = w
-        obstaculos[numObstaculos].y = 530
+        obstaculos[numObstaculos].y = h - 40
         transition.to(obstaculos[numObstaculos],{x= w,y=-60, time = tempo,onComplete = some2})
      end
 end
@@ -103,11 +99,16 @@ local function colisao(event)
 end
 -- função para game over
 local function  colisao2(event)
+
    if((event.object1.myName=="parede" and event.object2.myName=="bola")
 		or(event.object1.myName=="bola" and event.object2.myName=="parede"))then
 		  audio.play(somDeGameOver)
           event.object1.myName=nil
-		  gameOver()
+		  if(score > pontos)then
+	        banco.atualiza(score)
+	      end
+		  banco.setScore(score)
+	      gameOver()
 	end
 end
 -- função para movimentação das nuvens
@@ -118,68 +119,55 @@ local function movimentaNuvem(self,event)
 	   self.x = self.x + self.speed
 	end
 end
---[[
-local function onAccelerate( event )
 
-	-- Format and display the Accelerator values
-	--
-	xyzFormat( xg, event.xGravity)
-	xyzFormat( yg, event.yGravity)
-	xyzFormat( zg, event.zGravity)
-	xyzFormat( xi, event.xInstant)
-	xyzFormat( yi, event.yInstant)
-	xyzFormat( zi, event.zInstant)
-
-	frameUpdate = false		-- update done
-
-	-- Move our object based on the accelerator values
-	--
-	bola.x = centerX + (centerX * event.xGravity)
-	bola.y = centerY + (centerY * event.yGravity * -1)
-
-end]]
-
+local function movePaddle(event)
+    if event.xInstant > 0.1 then
+		fiscaAcc.setGravity(6, 10)
+	elseif event.xInstant < -0.1 then
+		fiscaAcc.setGravity(-6, 10)
+	elseif event.xGravity > 0.1 then
+		fiscaAcc.setGravity(6, 10)
+	elseif event.xGravity < -0.1 then
+		fiscaAcc.setGravity(-6, 10)
+	else
+		fiscaAcc.setGravity (0, 10)
+	end
+end
+-- funções que deslocam o presonagem 
+local function movimentaBolaD(self,event)
+    if self.x < 0 then
+	    self.x = 320
+		print("movimentaBolaD")
+	end
+	if self.x > 320 then
+	    self.x = 0
+		print("movimentaBolaE")
+	end
+end
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
 	--print("Estou createScene upGravit")
     local screenGroup = self.view
 
 	fundo = display.newImage("imagens/fundo.png")
-	fundo.x = display.contentWidth / 2
-	fundo.y = display.contentHeight/2
+	fundo.x = wx/ 2
+	fundo.y = h/2
     screenGroup:insert( fundo)
 
 	score = 0
-    textScore = display.newText("Score: "..score, 200,0, nil, 20)
+
+    textScore = display.newText("Score: "..score, wx*0.6,h - 560, nil, 23)
     textScore:setTextColor(0,0,255)
 	screenGroup:insert( textScore )
-	--[[ direcional esquerdo
-    setaEsq = display.newImage("imagens/seta.png")
-    setaEsq.x = 45; setaEsq.y = 550;
-    setaEsq.rotation = 180;
-	screenGroup:insert(setaEsq)
-    -- direcional direito
-    setaDir = display.newImage("imagens/seta.png")
-    setaDir.x = 280; setaDir.y = 552;
-	screenGroup:insert(setaDir)
-    ]]
+
+
 	local parede = display.newRect(0,-40,display.contentWidth,1)
-    fisica.addBody(parede,"static")
+    fiscaAcc.addBody(parede,"static")
     parede.myName="parede"
     parede.alpha = 0
 	screenGroup:insert(parede)
     local parede = display.newRect(0,570,display.contentWidth,1)
-    fisica.addBody(parede,"static")
-    parede.myName="parede"
-    parede.alpha = 0
-    screenGroup:insert(parede)
-	local parede = display.newRect(-20,0,1,display.contentHeight)
-    fisica.addBody(parede,"static")
-    parede.myName="parede"
-    parede.alpha = 0
-	screenGroup:insert(parede)
-    local parede = display.newRect(340,0,1,display.contentHeight)
-    fisica.addBody(parede,"static")
+    fiscaAcc.addBody(parede,"static")
     parede.myName="parede"
     parede.alpha = 0
     screenGroup:insert(parede)
@@ -209,19 +197,19 @@ end
 function scene:enterScene( event )
   --print("Estou enterScene upGravit")
   storyboard.purgeScene("menu")
-  fisica.start()
-
+  fiscaAcc.start()
+  fiscaAcc.setGravity(0, 10)
+  pontos = banco.lista()
   --variaveis de movimentação
-  motionx = 0
-  speed = 3
-  --array de obstaculos
-  obstaculos = {}
+  motionx = 0 -- orientação para o direcional
+  speed = 4  -- velocidade do movimento do personagem
+  obstaculos = {}  --array de obstaculos
   numObstaculos = 0 -- variavel para contagem de obstaculos
   tick = 1200--1500 -- medida de tempo para cada obstaculo aparece
   w = 0 -- guarda a posição x
   tempo = 7000 -- guarda o tempo utilizado no transation
 
-  --[[ função para parada do personagem
+  -- função para parada do personagem
   function stop (event)
 	if event.phase =="ended" then
 		motionx = 0;
@@ -229,25 +217,7 @@ function scene:enterScene( event )
   end
   Runtime:addEventListener("touch", stop )
 
-  -- movimenta o personagem
-  function moveBola (event)
-	bola.x = bola.x + motionx;
-  end
-  Runtime:addEventListener("enterFrame", moveBola)
-
-  --mover seta esquerda
-  function setaEsq:touch()
-	motionx = -speed;
-  end
-  setaEsq:addEventListener("touch",left)
-
-  -- mover seta direita
-  function setaDir:touch()
-	motionx = speed;
-  end
-  setaDir:addEventListener("touch",right)
-  ]]
-   -- loop do jogo
+  -- loop do jogo
   local function loop()
    loadObstaculos()
    if score > 3000 then
@@ -275,6 +245,7 @@ function scene:enterScene( event )
 
   carregaPersonagem()
   fistObs()
+  Runtime:addEventListener('accelerometer', movePaddle)
   --Runtime:addEventListener ("accelerometer", onAccelerate);
   -- chama em tempo de execução a função para movimentação das nuvens
   nuvem.enterFrame = movimentaNuvem
@@ -283,6 +254,8 @@ function scene:enterScene( event )
   Runtime:addEventListener("enterFrame", nuvem2)
   nuvem3.enterFrame = movimentaNuvem
   Runtime:addEventListener("enterFrame", nuvem3)
+  bola.enterFrame = movimentaBolaD
+  Runtime:addEventListener("enterFrame", bola)
   -- chama em tempo de execução o metodo colisao, especificando que é uma colisão entre dois objetos
   Runtime:addEventListener("collision", colisao)
   Runtime:addEventListener("collision", colisao2)
@@ -295,13 +268,10 @@ end
 -- Called when scene is about to move offscreen:
 function scene:exitScene(event)
 	--print("Estou existScene upGravit")
-	print(masterVolume)
-	print( result )
      local group = self.view
-     --fisica.stop()
-	 --Runtime:removeEventListener("accelerometer", onAccelerate);
-	 --Runtime:removeEventListener("touch", stop )
-	 --Runtime:removeEventListener("enterFrame", moveBola)
+	 Runtime:removeEventListener("touch", stop )
+	 Runtime:removeEventListener("enterFrame", bola)
+     Runtime:removeEventListener('accelerometer', movePaddle)
 	 Runtime:removeEventListener("enterFrame", nuvem)
 	 Runtime:removeEventListener("enterFrame", nuvem2)
 	 Runtime:removeEventListener("enterFrame", nuvem3)
@@ -309,13 +279,10 @@ function scene:exitScene(event)
      Runtime:removeEventListener("collision", colisao2)
 	 bola:removeSelf()
 	 obstaculo:removeSelf()
-
+     --fiscaAcc.stop()
 	 timer.cancel( memTimer ); memTimer = nil;
 
-	 --audio.dispose(somDeImpacto)
-	 --audio.dispose(somDeGameOver)
-	 --transition.cancel(transicao)
-
+     -- limpar memoria
 	 for i=1,table.getn(obstaculos) do
 	   if(obstaculos[i].myName~= nil) then
          obstaculos[i]:removeSelf()
@@ -329,8 +296,8 @@ end
 function scene:destroyScene( event )
 
 	--[[print("Estou destroyScene upGravit")
-	package.loaded[fisica] = nil
-	fisica = nil]]
+	package.loaded[fiscaAcc] = nil
+	fiscaAcc = nil]]
 end
 
 ---------------------------------------------------------------------------------
