@@ -15,25 +15,21 @@ local widget = require "widget"
 
 -- declarações para a frente e outros locais
 local playBtn
-opcao = 0
-print("menu")
+
+
 
 -- 'onRelease "ouvinte de eventos para playBtn
 local function chamarUpGravit()
-    if (opcao == 1 or opcao == 0) then
-      storyboard.gotoScene( "upGravit", "crossFade", 500 )
-	elseif(opcao == 2)then
-	  storyboard.gotoScene( "upGravitMovimento", "crossFade", 500 )
-	end
-    return true	-- indica toque bem sucedida
+
+	storyboard.gotoScene( "upGravit", "crossFade", 500 )
+
+	return true	-- indica toque bem sucedida
 end
 
 local function chamarOpcoes()
     storyboard.gotoScene( "opcoes", "slideLeft", 500 )
     return true	-- indica toque bem sucedida
 end
-
-
 
 -----------------------------------------------------------------------------------------
 -- INÍCIO DE SUA IMPLEMENTAÇÃO
@@ -54,15 +50,9 @@ function scene:createScene( event )
 	background:setReferencePoint( display.TopLeftReferencePoint )
 	background.x, background.y = 0, 0
 
-	-- criar imagem do logotipo / título / posição sobre superior a metade da tela
-	--[[local titleLogo = display.newImageRect( "imagens/logo.png", 264, 42 )
-	titleLogo:setReferencePoint( display.CenterReferencePoint )
-	titleLogo.x = display.contentWidth * 0.5
-	titleLogo.y = 100]]
-
 	-- criar um botão widget (que carrega upGravit.lua em chamarUpGravit)
 	playBtn = widget.newButton{
-		label="Jogar",
+		label="Play",
 		labelColor = { default={255}, over={128} },
 		defaultFile="imagens/button.png",
 		overFile="imagens/button-over.png",
@@ -75,7 +65,7 @@ function scene:createScene( event )
 
 	-- criar um botão widget (que carrega upGravit.lua em chamarUpGravit)
 	playBtn2 = widget.newButton{
-		label="Opcoes",
+		label="Record",
 		labelColor = { default={255}, over={128} },
 		defaultFile="imagens/button.png",
 		overFile="imagens/button-over.png",
@@ -110,9 +100,6 @@ end
 function scene:exitScene( event )
     --print("Estou exitScene menu")
 	local group = self.view
-
-	-- Chamado quando a cena está prestes a se mover fora da tela:
-
 end
 
 -- Se a visão de cena é removido, a cena: destroyScene () será chamado pouco antes:

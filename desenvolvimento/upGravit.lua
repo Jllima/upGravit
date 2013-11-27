@@ -16,22 +16,22 @@ fisica.start(); fisica.pause()
 
 --fisica.setDrawMode("hybrid")
 -- Carregar variaveis
-local fundo,textScore,memTimer,bola,speed,obstaculos,numObstaculos,score,pontos,
-       obstaculo,tick,w,tempo,setaEsq,setaDir,nuvem,nuvem2,nuvem3,sheet1,spriteSet1
+local fundo,textScore,memTimer,bola,speed,obstaculos,obstaculos2,numObstaculos,numObstaculos2,score,pontos,
+       obstaculo,w,tempo,setaEsq,setaDir,nuvem,nuvem2,nuvem3,sheet1,spriteSet1,cont,cont2,font
+
 somDeImpacto = audio.loadSound("sounds/impacto.wav")
 somDeGameOver = audio.loadSound("sounds/destructe.wav")
-local masterVolume = audio.getVolume(somDeImpacto)
 local wx = display.contentWidth
 local h = display.contentHeight
-print("upGravit")
+
 -- função para game over
-function gameOver()
+local function gameOver()
 	--if event.phase == "began" then
-    storyboard.gotoScene( "gameOver", "crossFade", 400 )--"gameOver"
+    storyboard.gotoScene( "gameOver", "crossFade", 600 )--"gameOver"
     return true
 	--end
 end
--- função para carregar o personagem
+
 local function carregaPersonagem()
     sheet1 = graphics.newImageSheet( "imagens/sprites2.png", { width=35, height=35, numFrames=3})
     bola = display.newSprite(sheet1,{name="man", start=1, count=3, time=300,loopCount=1} )
@@ -40,24 +40,26 @@ local function carregaPersonagem()
     fisica.addBody(bola, {bounce=0.6, friction=0.1,radius = 20})
 	bola.isFixedRotation = true
     bola.myName="bola"
+	return bola
 end
--- atualizar o escores na tela
+
+local function fistObs(tempo)
+    obstaculo = display.newImage("imagens/obs.png")
+    obstaculo.x = wx/2
+    obstaculo.y = h - 40
+	fisica.addBody (obstaculo, "static",{bounce = 0.6,friction=0.1})
+    obstaculo.myName="obstaculos"
+	transition.to(obstaculo,{x= 157,y=-60, time = tempo,onComplete = some2})
+	return obstaculo
+end
+
+--atualizar o escores na tela
 local function updateTexto()
     textScore.text = "Score: "..score
 end
 -- fazer os obdtaculos sumirem
-function some2(self)
+local function some2(self)
     self.alpha = 0
-  end
-
---primeiro obstaculo para impedir que a bola caia no inicio do jogo
-local function fistObs()
-    obstaculo = display.newImage("imagens/obs.png")
-    obstaculo.x = wx/2
-    obstaculo.y = h - 40
-    transition.to(obstaculo,{x= 157,y=-60, time = tempo,onComplete = some2})
-	fisica.addBody (obstaculo, "static",{bounce = 0.6,friction=0.1})
-    obstaculo.myName="obstaculos"
 end
 
 -- carrega obstaculos em diferentes posições no jogo
@@ -87,19 +89,44 @@ local function loadObstaculos()
      end
 end
 
+local function loadObstaculos2()
+    -- trocar newImage por newImageRect, possiblita redenrizar o tamanho de imagen de acordo com dispositivo(alteração)
+	numObstaculos2 = numObstaculos2 + 1
+	obstaculos2[numObstaculos2] = display.newImage("imagens/obs2.png")
+	fisica.addBody(obstaculos2[numObstaculos2], "static",{bounce = 0.6,friction=0.1})
+    local whereFrom = math.random(3)  --determinar a direção do asteróide irá aparecer
+	obstaculos2[numObstaculos2].myName = "obstaculos2"
+     -- condições para os obstaculos carregarem  no jogo
+     if (whereFrom == 1) then
+	   w = math.random(45,120)
+	   obstaculos2[numObstaculos2].x = w
+       obstaculos2[numObstaculos2].y = h - 40
+	   transition.to(obstaculos2[numObstaculos2],{x= w,y=-60, time = tempo,onComplete = some2})--onComplete = some--cosumindo memoria
+     elseif (whereFrom == 2) then
+	   w = math.random(157,200)
+	   obstaculos2[numObstaculos2].x = w
+       obstaculos2[numObstaculos2].y = h - 40
+       transition.to(obstaculos2[numObstaculos2],{x= w,y=-60, time = tempo,onComplete = some2})
+	   elseif (whereFrom == 3) then
+	    w = math.random(200, 280)
+	    obstaculos2[numObstaculos2].x = w
+        obstaculos2[numObstaculos2].y = h - 40
+        transition.to(obstaculos2[numObstaculos2],{x= w,y=-60, time = tempo,onComplete = some2})
+     end
+end
+
 -- função pontuação
 local function colisao(event)
      if(event.phase == "began")then
 	     audio.play(somDeImpacto)-- chamar o som pre carregado
 		 --bola:prepare("walk")
 		 bola:play()
-         score=score+100
+         score=score+50
 		 updateTexto()
 	 end
 end
 -- função para game over
 local function  colisao2(event)
-
    if((event.object1.myName=="parede" and event.object2.myName=="bola")
 		or(event.object1.myName=="bola" and event.object2.myName=="parede"))then
 		  audio.play(somDeGameOver)
@@ -109,7 +136,16 @@ local function  colisao2(event)
 	      end
 		  banco.setScore(score)
 	      gameOver()
+	elseif((event.object1.myName=="obstaculos2" and event.object2.myName=="bola")
+		or(event.object1.myName=="bola" and event.object2.myName=="obstaculos2"))then
+		  audio.play(somDeGameOver)
+		  if(score > pontos)then
+	        banco.atualiza(score)
+	      end
+		  banco.setScore(score)
+	      gameOver()
 	end
+
 end
 -- função para movimentação das nuvens
 local function movimentaNuvem(self,event)
@@ -119,15 +155,13 @@ local function movimentaNuvem(self,event)
 	   self.x = self.x + self.speed
 	end
 end
--- funções que deslocam o presonagem 
+-- funções que deslocam o presonagem
 local function movimentaBolaD(self,event)
     if self.x < 0 then
 	    self.x = 320
-		print("movimentaBolaD")
 	end
 	if self.x > 320 then
 	    self.x = 0
-		print("movimentaBolaE")
 	end
 end
 
@@ -135,7 +169,13 @@ end
 function scene:createScene( event )
 	--print("Estou createScene upGravit")
     local screenGroup = self.view
-    
+
+	if "Win" == system.getInfo( "platformName" ) then
+      font = "Varela Round"
+    else
+      font = "VarelaRound-Regular"
+    end
+
 	fundo = display.newImage("imagens/fundo.png")
 	fundo.x = wx/ 2
 	fundo.y = h/2
@@ -143,17 +183,17 @@ function scene:createScene( event )
 
 	score = 0
 
-    textScore = display.newText("Score: "..score, wx*0.6,h - 560, nil, 23)
+    textScore = display.newText("Score: "..score, wx*0.6,h - 560, font, 23)
     textScore:setTextColor(0,0,255)
 	screenGroup:insert( textScore )
 	-- direcional esquerdo
     setaEsq = display.newImage("imagens/seta.png")
-    setaEsq.x = 45; setaEsq.y = 550;
+    setaEsq.x = 45; setaEsq.y = 530;
     setaEsq.rotation = 180;
 	screenGroup:insert(setaEsq)
     -- direcional direito
     setaDir = display.newImage("imagens/seta.png")
-    setaDir.x = 280; setaDir.y = 552;
+    setaDir.x = 280; setaDir.y = 532;
 	screenGroup:insert(setaDir)
 
 	local parede = display.newRect(0,-40,display.contentWidth,1)
@@ -166,6 +206,7 @@ function scene:createScene( event )
     parede.myName="parede"
     parede.alpha = 0
     screenGroup:insert(parede)
+
 	nuvem = display.newImage("imagens/NUVEM3.png")
 	nuvem:setReferencePoint(display.BottomRightReferencePoint)
 	nuvem.x = -50
@@ -198,8 +239,10 @@ function scene:enterScene( event )
   motionx = 0 -- orientação para o direcional
   speed = 4  -- velocidade do movimento do personagem
   obstaculos = {}  --array de obstaculos
+  obstaculos2 = {}  --array de obstaculos
   numObstaculos = 0 -- variavel para contagem de obstaculos
-  tick = 1200--1500 -- medida de tempo para cada obstaculo aparece
+  numObstaculos2 = 0 -- variavel para contagem de obstaculos
+  tick = 1200 -- medida de tempo para cada obstaculo aparece
   w = 0 -- guarda a posição x
   tempo = 7000 -- guarda o tempo utilizado no transation
 
@@ -231,33 +274,49 @@ function scene:enterScene( event )
 
    -- loop do jogo
   local function loop()
-   loadObstaculos()
-   if score > 3000 then
+   if(cont == cont2)then
+     loadObstaculos2()
+   else
+     loadObstaculos()
+   end
+
+   if score < 3000 then
+       cont = math.random(5)
+       cont2 = math.random(7)
+    elseif(score > 3000 and score <= 5000) then
+       cont = math.random(5)
+       cont2 = math.random(7)
+	   tick = 1100
 	   tempo = 6000
-	   --media.playEventSound("sounds/nivel.wav")
-    end
-	if score > 5000 then
-       tempo = 5000
-
-	 end
-	if score > 7000 then
+    elseif(score > 5000 and score <= 7000) then
+       cont = math.random(5)
+       cont2 = math.random(5)
+	   tick = 700
+	   tempo = 5500
+    elseif(score > 7000 and score <= 10000) then
+	   cont = math.random(4)
+       cont2 = math.random(4)
+	   tick = 400
+	   tempo = 5000
+    elseif(score > 10000 and score <= 11000)then
+	   cont = math.random(4)
+       cont2 = math.random(4)
+	   tick = 300
+	   tempo = 4500
+	elseif(score > 11000 and score <= 15000) then
+	   cont = math.random(3)
+       cont2 = math.random(3)
+	   tick = 200
 	   tempo = 4000
-
-	 end
-	 if score > 10000 then
-	   tempo = 3000
-     end
-	 if score > 11000 then
-	   tempo = 2000
-     end
-    if score > 12000 then
-	   tempo = 1000
+     elseif(score > 15000 )then
+	   cont = math.random(3)
+       cont2 = math.random(3)
+	   tick = 100
      end
   end
 
   carregaPersonagem()
-  fistObs()
-  
+  fistObs(tempo)
   -- chama em tempo de execução a função para movimentação das nuvens
   nuvem.enterFrame = movimentaNuvem
   Runtime:addEventListener("enterFrame", nuvem)
@@ -292,12 +351,17 @@ function scene:exitScene(event)
 	 obstaculo:removeSelf()
      --fisica.stop()
 	 timer.cancel( memTimer ); memTimer = nil;
-
      -- limpar memoria
 	 for i=1,table.getn(obstaculos) do
 	   if(obstaculos[i].myName~= nil) then
          obstaculos[i]:removeSelf()
          obstaculos[i].myName=nil
+	   end
+	 end
+	 for i=1,table.getn(obstaculos2) do
+	   if(obstaculos2[i].myName~= nil) then
+         obstaculos2[i]:removeSelf()
+         obstaculos2[i].myName=nil
 	   end
 	 end
 
@@ -306,9 +370,7 @@ end
 -- Called prior to the removal of scene's "view" (display group)
 function scene:destroyScene( event )
 
-	--[[print("Estou destroyScene upGravit")
-	package.loaded[fisica] = nil
-	fisica = nil]]
+
 end
 
 ---------------------------------------------------------------------------------

@@ -29,6 +29,15 @@ settings = {
             --]]
 		}
 	},
+	 android = {
+         plist = {
+         UIAppFonts =
+         {
+         "VarelaRound-Regular.ttf"
+         },
+         UIApplicationExitsOnSuspend = true
+         },
+         }
 	
 	--[[
 	-- Android permissions

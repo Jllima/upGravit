@@ -3,7 +3,8 @@ local scene = storyboard.newScene()
 local widget = require "widget"
 local banco = require("banco")
 
-local playBtn,label1, touch, movimento,label2, pontos,textoPoint,theBest
+local playBtn,label1,label2, pontos,textoPoint,theBest,
+       grade,font,opcoes
 local w = display.contentWidth
 local h = display.contentHeight
 
@@ -12,37 +13,25 @@ local function chamarMenu()
     return true
 end
 
-local function opcaoMovimento()
-    opcao = 2
-    storyboard.gotoScene( "menu", "slideRight", 500 )
-    return true
-end
-local function opcaoThouch()
-    opcao = 1
-    storyboard.gotoScene( "menu", "slideRight", 500 )
-    return true
-end
-
 function scene:createScene( event )
   local group = self.view
 
-  theBest = display.newText( "Melhor pontuacao", w*0.2, h - 300, native.systemFontBold, 20 )
+  if "Win" == system.getInfo( "platformName" ) then
+    font = "Varela Round"
+  else
+    font = "VarelaRound-Regular"
+  end
+
+  theBest = display.newImage("imagens/theBest.png")
+  theBest:setReferencePoint( display.CenterReferencePoint )
+  theBest.x,theBest.y = w/2, h - 400                         --newText( "THE BEST", w*0.27, h - 300, font, 30 )
   group:insert(theBest)
 
   pontos = banco.lista()
-  textoPoint = display.newText(pontos, w*0.4, h - 250 , native.systemFontBold, 18)
-
-
-  label1 = display.newText( "Opcoes", 20, 30, native.systemFontBold, 20 )
-  label1:setTextColor( 190, 190, 255 )
-  group:insert(label1)
-
-  label2 = display.newText( "Escolha o tipo de jogabilidade", 20, 100, native.systemFontBold, 20 )
-  label2:setTextColor( 190, 190, 255 )
-  group:insert(label2)
+  textoPoint = display.newText(pontos, w*0.36, h - 300 , font, 30)
 
   playBtn = widget.newButton{
-		label="voltar",
+		label="BACK",
 		labelColor = { default={255}, over={128} },
 		defaultFile="imagens/button.png",
 		overFile="imagens/button-over.png",
@@ -53,33 +42,7 @@ function scene:createScene( event )
   playBtn.x = w*0.5
   playBtn.y = h - 100
 
-  touch = widget.newButton{
-		label="touch",
-		labelColor = { default={255}, over={128} },
-		defaultFile="imagens/button.png",
-		overFile="imagens/button-over.png",
-		width=110, height=40,
-		onRelease = opcaoThouch	-- função de ouvinte de evento
-  }
-  touch:setReferencePoint( display.CenterReferencePoint )
-  touch.x = w*0.3
-  touch.y = h - 400
-
-  movimento = widget.newButton{
-		label="movimento",
-		labelColor = { default={255}, over={128} },
-		defaultFile="imagens/button.png",
-		overFile="imagens/button-over.png",
-		width=110, height=40,
-		onRelease = opcaoMovimento	-- função de ouvinte de evento
-  }
-  movimento:setReferencePoint( display.CenterReferencePoint )
-  movimento.x = w*0.7
-  movimento.y = h - 400
-
   group:insert(playBtn)
-  group:insert(touch)
-  group:insert(movimento)
   group:insert(textoPoint)
 end
 
@@ -91,7 +54,6 @@ end
 function scene:exitScene( event )
 
 	local group = self.view
-	--label1:removeSelf()
 end
 
 

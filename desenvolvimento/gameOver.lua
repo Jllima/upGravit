@@ -4,7 +4,7 @@ local banco = require("banco")
 
 local widget = require "widget"
 
-local playBtn,fundoGameOver, pontos,textoPoint,textoPoint2,record
+local playBtn,fundoGameOver, pontos,textoPoint,textoPoint2,record,gameOver,imagePontos,font
 local w = display.contentWidth
 local h = display.contentHeight
 
@@ -20,15 +20,33 @@ end
 function scene:createScene( event )
   --print("Estou createScene gameOver")
     local group = self.view
+
+	if "Win" == system.getInfo( "platformName" ) then
+      font = "Varela Round"
+    else
+      font = "VarelaRound-Regular"
+    end
+
 	pontos = banco.getScore()
 	record = banco.lista()
-    textoPoint = display.newText("Pontos: "..pontos, w*0.3, h/2, native.systemFont, 25)
-    textoPoint2 = display.newText("Record: "..record, w*0.3, h - 250, native.systemFont, 25)
-    fundoGameOver = display.newImage("imagens/gameOver.png")
+    textoPoint = display.newText(pontos, w*0.4, h - 310,font, 30)
+    textoPoint2 = display.newText(record, w*0.35, h - 220,font, 30)
+
+	fundoGameOver = display.newImage("imagens/fundo.png")
 	fundoGameOver:setReferencePoint( display.TopLeftReferencePoint )
 	fundoGameOver.x, fundoGameOver.y = 0,0
-    playBtn = widget.newButton{
-		label="iniciar",
+	fundoGameOver.alpha = 0.7
+
+	gameOver = display.newImage("imagens/gameOver.png")
+	gameOver:setReferencePoint( display.CenterReferencePoint)
+	gameOver.x, gameOver.y = w/2,h - 450
+
+    imagePontos = display.newImage("imagens/record.png")
+	imagePontos:setReferencePoint( display.CenterReferencePoint)
+	imagePontos.x, imagePontos.y = w/2,h - 300
+
+	playBtn = widget.newButton{
+		label="menu",
 		labelColor = { default={255}, over={128} },
 		defaultFile="imagens/button.png",
 		overFile="imagens/button-over.png",
@@ -40,9 +58,11 @@ function scene:createScene( event )
 	playBtn.y = display.contentHeight - 140
 
 	group:insert(fundoGameOver)
+	group:insert(gameOver)
 	group:insert( playBtn )
     group:insert(textoPoint)
 	group:insert(textoPoint2)
+	group:insert(imagePontos)
 	return true	-- indica toque bem sucedida
 
 end
